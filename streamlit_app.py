@@ -10,7 +10,7 @@ with st.sidebar:
         openai.api_key = st.secrets['OPENAI_API_KEY']
     else:
         openai.api_key = st.text_input('Enter OpenAI API token:', type='password')
-        if not (openai.api_key.startswith('sk-') and len(openai.api_key)==51):
+        if not (openai.api_key.startswith('sk-') and len(openai.api_key) == 51):
             st.warning('Please enter your credentials!', icon='⚠️')
         else:
             st.success('Proceed to entering your prompt message!', icon='👉')
@@ -29,11 +29,10 @@ if prompt := st.chat_input("What is up?"):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         full_response = ""
-        for response in openai.ChatCompletion.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
-            messages=[{"role": m["role"], "content": m["content"]}
-                      for m in st.session_state.messages], stream=True):
-            full_response += response.choices[0].delta.get("content", "")
-            message_placeholder.markdown(full_response + "▌")
+            messages=[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+        )
+        full_response = response.choices[0].message["content"]
         message_placeholder.markdown(full_response)
     st.session_state.messages.append({"role": "assistant", "content": full_response})
